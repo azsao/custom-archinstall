@@ -80,10 +80,10 @@ fstab () {
 
 sysconfig () {
 
-  # root password
+  # setting root password
 echo "root:$rootpass" | arch-chroot /mnt chpasswd
 
-  # user & pass 
+  # creating user & pass 
 arch-chroot /mnt useradd -m "$username"
 echo "$username:$userpass" | arch-chroot /mnt chpasswd
 arch-chroot /mnt usermod -aG wheel,storage,power "$username"
@@ -105,6 +105,7 @@ fi
   locale-gen
   echo LANG=en_US.UTF-8 > /etc/locale.conf
   export LANG=en_US.UTF-8
+  ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
   EOF
 }
 
@@ -118,14 +119,8 @@ cat > /mnt/etc/hosts <<EOF
 EOF
 }
 
-zoneinfo () {
-
-  ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
-
-}
-
 grub () {
-  grub_file="/etc/default/grub"
+grub_file="/mnt/etc/default/grub"
 
 # installing GRUB
   arch-chroot /mnt /bin/bash -e <<EOF
@@ -165,6 +160,10 @@ until mirrors; do : ; done
 until pacstrap; do : ; done
 until fstab; do : ; done
 until sysconfig; do : ; done
+until hostname; do : ; done
+until locale; do : ; done
+until grub; do : ; done
+until enable_service; do : ; done
 
 umount -lR /mnt
 
