@@ -48,6 +48,38 @@ read -r -s rootpass
 
 input_print "Please enter your desired hostname: "
 read -r -s hostname
+
+}
+
+# still apart of the questionaire
+select_gpu() {
+    while true; do
+        info_print "List of GPU: "
+        info_print "1) AMD"
+        info_print "2) INTEL"
+        info_print "3) NVIDIA"
+        info_print "4) VIRTUALBOX"
+        input_print "Please select the number corresponding to your GPU (e.g., 1): "
+        read -r gpu_choice
+
+        case $gpu_choice in
+            1 )
+                gpu="mesa xf86-video-amdgpu amd-ucode vulkan-radeon"
+                return 0;;
+            2 )
+                gpu="mesa xf86-video-intel intel-ucode"
+                return 0;;
+            3 )
+                gpu="nvidia nvidia-utils nvidia-settings"
+                return 0;;
+            4 )
+                gpu="virtualbox-guest-utils"
+                return 0;;
+            * )
+                error_print "Invalid selection. Please try again."
+                ;;
+        esac
+    done
 }
 
 partition () {
@@ -71,7 +103,7 @@ mirrors () {
 }
 
 pacstrap () {
-  pacstrap -i /mnt base base_devel linux linux-headers linux-firmware mesa xf86-video-amdgpu amd-ucode vulkan-radeon sudo nano vim git neofetch networkmanager dhcpcd pipewire bluez wpa_supplicant
+  pacstrap -i /mnt base base_devel linux linux-headers linux-firmware "$gpu" sudo nano vim git neofetch networkmanager dhcpcd pipewire bluez wpa_supplicant
 }
 
 fstab () {
@@ -154,6 +186,7 @@ EOF
 
 
 until questionaire; do : ; done
+until select_gpu; do : ; done
 until partition; do : ; done
 until timedate; do : ; done
 until mirrors; do : ; done
